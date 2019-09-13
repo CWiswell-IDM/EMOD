@@ -49,6 +49,7 @@ namespace Kernel {
 //        ENUM_VALUE_SPEC( PIECEWISE_LINEAR                                    , 8 )
         ENUM_VALUE_SPEC( WEIBULL_DISTRIBUTION                                , 9 )
         ENUM_VALUE_SPEC( DUAL_EXPONENTIAL_DISTRIBUTION                       ,10 )
+        ENUM_VALUE_SPEC( GAMMA_DISTRIBUTION                                  ,11 )
         )
 
 class IDMAPI Probability

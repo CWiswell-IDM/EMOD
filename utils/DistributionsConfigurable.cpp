@@ -46,6 +46,9 @@ namespace Kernel
     BEGIN_QUERY_INTERFACE_BODY( DistributionUniformConfigurable )
     END_QUERY_INTERFACE_BODY( DistributionUniformConfigurable )
 
+    BEGIN_QUERY_INTERFACE_BODY( DistributionGammaConfigurable )
+    END_QUERY_INTERFACE_BODY( DistributionGammaConfigurable )
+
     BEGIN_QUERY_INTERFACE_BODY( DistributionPiecewiseConstantConfigurable )
     END_QUERY_INTERFACE_BODY( DistributionPiecewiseConstantConfigurable )
 
@@ -385,6 +388,39 @@ namespace Kernel
         DistributionUniform::serialize(ar, obj);
     }
 
+    //---------------- DistributionFunctionConfigurable::GAMMA  -------------------
+    DistributionGammaConfigurable::DistributionGammaConfigurable( )
+        : DistributionGamma()
+    {
+        m_Param1 = 3.0f;
+        m_Param2 = 1.0f;
+    }
+
+    DistributionGammaConfigurable::~DistributionGammaConfigurable()
+    { }
+
+    bool DistributionGammaConfigurable::Configure( JsonConfigurable* pParent, std::string& param_name, const Configuration* config )
+    {
+        const std::string param_shape( param_name + "_Shape" );
+        const std::string param_scale( param_name + "_Scale" );
+        const std::string distribution_name( param_name + "_Distribution" );
+
+        pParent->initConfigTypeMap( param_shape.c_str(), &m_Param1, Distribution_Gamma_Shape_DESC_TEXT, 0.0001f, FLT_MAX, 3.0f, distribution_name.c_str(), "GAMMA_DISTRIBUTION" );
+        pParent->initConfigTypeMap( param_scale.c_str(), &m_Param2, Distribution_Gamma_Scale_DESC_TEXT, 0.0001f, FLT_MAX, 1.0f, distribution_name.c_str(), "GAMMA_DISTRIBUTION" );
+
+        return pParent->JsonConfigurable::Configure( config );
+    }  
+
+    IDistribution* DistributionGammaConfigurable::Clone() const
+    {
+        return new DistributionGammaConfigurable( *this );
+    }
+
+    REGISTER_SERIALIZABLE( DistributionGammaConfigurable );
+    void DistributionGammaConfigurable::serialize(IArchive& ar, DistributionGammaConfigurable* obj)
+    {
+        DistributionGamma::serialize(ar, obj);
+    }
 
     //---------------- DistributionFunction::PIECEWISE_CONSTANT  -------------------
     DistributionPiecewiseConstantConfigurable::DistributionPiecewiseConstantConfigurable()

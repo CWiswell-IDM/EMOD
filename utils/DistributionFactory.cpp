@@ -40,6 +40,8 @@ namespace Kernel
             return new DistributionDualConstant();
         case DistributionFunction::UNIFORM_DISTRIBUTION:
             return new DistributionUniform();
+        case DistributionFunction::GAMMA_DISTRIBUTION:
+            return new DistributionGamma();
         default:
             throw Kernel::IllegalOperationException( __FILE__, __LINE__, __FUNCTION__, "DistributionFunction does not exist." );
         }
@@ -109,6 +111,12 @@ namespace Kernel
                 distribution->Configure( pParent, base_parameter_name, config );
                 return distribution;
             }
+            case DistributionFunction::GAMMA_DISTRIBUTION:
+            {
+                DistributionGammaConfigurable* distribution = new DistributionGammaConfigurable();
+                distribution->Configure( pParent, base_parameter_name, config );
+                return distribution;
+            }
             default:
                 throw Kernel::IllegalOperationException( __FILE__, __LINE__, __FUNCTION__, "DistributionFunction does not exist." );
         }
@@ -143,5 +151,9 @@ namespace Kernel
 
         DistributionUniformConfigurable distribution_uniform;
         distribution_uniform.Configure( pParent, base_parameter_name, config );
+
+        DistributionGammaConfigurable distribution_gamma;
+        distribution_gamma.Configure( pParent, base_parameter_name, config );
+
     }
 }

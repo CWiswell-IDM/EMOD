@@ -1,0 +1,2 @@
+#define Distribution_Gamma_Shape_DESC_TEXT "The shape parameter for the gamma distribution."
+#define Distribution_Gamma_Scale_DESC_TEXT "The scale parameter for the gamma distribution."

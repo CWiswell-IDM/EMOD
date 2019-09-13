@@ -46,6 +46,9 @@ namespace Kernel
     BEGIN_QUERY_INTERFACE_BODY( DistributionUniform )
     END_QUERY_INTERFACE_BODY( DistributionUniform )
 
+    BEGIN_QUERY_INTERFACE_BODY( DistributionGamma )
+    END_QUERY_INTERFACE_BODY( DistributionGamma )
+
     BEGIN_QUERY_INTERFACE_BODY( DistributionPiecewiseConstant )
     END_QUERY_INTERFACE_BODY( DistributionPiecewiseConstant )
 
@@ -318,6 +321,33 @@ namespace Kernel
 
     REGISTER_SERIALIZABLE(DistributionUniform);
     void DistributionUniform::serialize(IArchive& ar, DistributionUniform* obj)
+    {
+        DistributionBase::serialize(ar, obj);
+    }
+
+    //---------------- DistributionFunction::GAMMA  -------------------
+    DistributionGamma::DistributionGamma()
+        : DistributionBase()
+    {
+        type = DistributionFunction::GAMMA_DISTRIBUTION;
+    }
+
+    DistributionGamma::~DistributionGamma()
+    {
+    }
+
+    float DistributionGamma::Calculate( RANDOMBASE* pRNG ) const
+    {
+        return pRNG->rand_gamma(m_Param1, m_Param2);
+    }
+
+    IDistribution* DistributionGamma::Clone() const
+    {
+        return new DistributionGamma(*this);
+    }
+
+    REGISTER_SERIALIZABLE(DistributionGamma);
+    void DistributionGamma::serialize(IArchive& ar, DistributionGamma* obj)
     {
         DistributionBase::serialize(ar, obj);
     }

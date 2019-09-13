@@ -21,6 +21,12 @@
 
 #include "ISerializable.h"
 
+#define FLOAT_EXP    8
+#define DOUBLE_EXP  11
+#define PI_F         3.1415927f
+#define PRNG_COUNT  (1<<20)
+#define SQRT2        1.414214f
+
 namespace Kernel
 {
     // ------------------------------------------------------------------------
@@ -51,8 +57,10 @@ namespace Kernel
         std::set<uint32_t> chooseMofN( uint32_t M, uint32_t N );
 
         double ee();
-    
+
         double eGauss();    // Returns a normal deviate.
+
+        float  rand_gamma(float k, float theta);
 
         // Added by Philip Eckhoff, Poisson takes in a rate, and returns the number of events in unit time
         // Or equivalently, takes in rate*time and returns number of events in that time
@@ -75,13 +83,6 @@ namespace Kernel
         // Sum(rFractions) * N ~= Sum(returned vector) such that Sum(returned vector) <= N.
         std::vector<uint64_t> multinomial_approx( uint64_t N, const std::vector<float>& rFractions );
 
-        // M Behrend
-        // gamma-distributed random number
-        // shape constant k=2
-        double rand_gamma(double mean);
-        double gamma_cdf(double x, double mean);
-        double get_cdf_random_num_precision();
-
     protected:
 
         virtual void fill_bits();
@@ -96,9 +97,6 @@ namespace Kernel
         
         bool   bGauss;
         double eGauss_;
-
-        // precision of gamma-distributed random number
-        static double cdf_random_num_precision;
     };
 
     // ------------------------------------------------------------------------

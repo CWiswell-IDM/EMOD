@@ -154,6 +154,7 @@ namespace Kernel
         friend class DistributionDualConstantConfigurable;
         friend class DistributionDualExponentialConfigurable;
         friend class DistributionUniformConfigurable;
+        friend class DistributionGammaConfigurable;
         friend class DistributionPiecewiseConstantConfigurable;
         friend class DistributionPiecewiseLinearConfigurable;
 
