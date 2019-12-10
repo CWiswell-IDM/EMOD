@@ -20,6 +20,7 @@ namespace Kernel
     ENUM_DEFINE(TBInfectionDrugResistance,
         ENUM_VALUE_SPEC(DrugSensitive           , 0)
         ENUM_VALUE_SPEC(FirstLineResistant      , 1))
+
     class IIndividualHumanCoInfection;
 
     class IInfectionTB : public ISupports
@@ -90,6 +91,8 @@ namespace Kernel
     public:
         virtual ~InfectionTB(void);
         static InfectionTB *CreateInfection(IIndividualHumanContext *context, suids::suid _suid);
+
+        virtual float GetInfectiousness() const override;
 
         virtual void SetParameters(IStrainIdentity* infstrain=nullptr, int incubation_period_override = -1) override;
         virtual void Update(float dt, ISusceptibilityContext* immunity = nullptr) override;

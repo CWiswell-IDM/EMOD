@@ -38,6 +38,7 @@ namespace Kernel {
 
     // ENUM defs for INCUBATION_DISTRIBUTION, INFECTIOUS_DISTRIBUTION
     ENUM_DEFINE(DistributionFunction, 
+        ENUM_VALUE_SPEC( NOT_INITIALIZED                                     ,-1 )
         ENUM_VALUE_SPEC( CONSTANT_DISTRIBUTION                               , 0 )
         ENUM_VALUE_SPEC( UNIFORM_DISTRIBUTION                                , 1 )
         ENUM_VALUE_SPEC( GAUSSIAN_DISTRIBUTION                               , 2 )

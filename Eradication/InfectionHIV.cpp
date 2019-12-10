@@ -225,10 +225,9 @@ namespace Kernel
 
     void InfectionHIV::SetParameters( IStrainIdentity* infstrain, int incubation_period_override)
     {
-        LOG_DEBUG_F( "New HIV infection for individual %d; incubation_period_override = %d.\n", parent->GetSuid().data, incubation_period_override );
-        // Don't call down into baseclass. Copied two lines below to repro required functionality.
-        incubation_timer = incubation_period_override;
+        // Don't call down into baseclass.
         CreateInfectionStrain(infstrain);
+        incubation_timer = -1.0f;
 
         if( incubation_period_override == 0 )
         {
@@ -240,9 +239,11 @@ namespace Kernel
             LOG_DEBUG_F( "Individual is outbreak seed, fast forward infection by %f.\n", fast_forward );
             SetStageFromDuration();
         }
+        LOG_DEBUG_F( "New HIV infection for individual %d; incubation_period_override = %d.\n", parent->GetSuid().data, incubation_period_override );
+
         total_duration = HIV_duration_until_mortality_without_TB;
         // now we have 3 variables doing the same thing?
-        infectiousness = InfectionConfig::base_infectivity;
+        infectiousness = InfectionConfig::infectivity_distribution->Calculate( GetParent()->GetRng() );
         StateChange    = InfectionStateChange::None;
     }
 

@@ -190,17 +190,6 @@ namespace Kernel
     void InfectionTyphoid::SetParameters( IStrainIdentity* infstrain, int incubation_period_override )
     {
         CreateInfectionStrain(infstrain);
-
-        if(infstrain == NULL)
-        {
-            // using default strainIDs
-            //infection_strain->SetAntigenID(default_antigen);
-        }
-        else
-        {
-            infection_strain->SetAntigenID( infstrain->GetAntigenID() );
-            infection_strain->SetGeneticID( infstrain->GetGeneticID() );
-        }
     }
 
     void InfectionTyphoid::InitInfectionImmunology(ISusceptibilityContext* _immunity)

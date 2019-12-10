@@ -1,0 +1,1 @@
+#define Base_Infectivity_Distribution_DESC_TEXT "The distribution type to use when assigning a quantity of infectivity to an infection."

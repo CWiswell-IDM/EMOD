@@ -463,7 +463,7 @@ namespace Kernel
         duration = 0.0f;
 
         // Set infectiousness
-        infectiousness = InfectionConfig::base_infectivity * InfectionTBConfig::TB_active_presymptomatic_infectivity_multiplier * immunityTB->GetCoughInfectiousness();
+        infectiousness = InfectionConfig::infectivity_distribution->Calculate( GetParent()->GetRng() ) * InfectionTBConfig::TB_active_presymptomatic_infectivity_multiplier * immunityTB->GetCoughInfectiousness();
 
         //fitness penalty for MDR
         if ( infection_strain->GetGeneticID() == TBInfectionDrugResistance::FirstLineResistant ) 
@@ -551,7 +551,7 @@ namespace Kernel
 
         float death_rate = InfectionTBConfig::TB_active_mortality_rate * immunity->getModMortality() * idvie->GetInterventionReducedMortality();
 
-        infectiousness = InfectionConfig::base_infectivity * immunityTB->GetCoughInfectiousness();
+        infectiousness = InfectionConfig::infectivity_distribution->Calculate( GetParent()->GetRng() ) * immunityTB->GetCoughInfectiousness();
 
         //fitness penalty for MDR
         if ( infection_strain->GetGeneticID() == TBInfectionDrugResistance::FirstLineResistant ) 
@@ -927,8 +927,7 @@ namespace Kernel
 
     InfectionTB::~InfectionTB(void) { }
     
-    bool
-    InfectionTB::IsActive() const
+    bool InfectionTB::IsActive() const
     {
         return m_is_active;
     }
@@ -971,7 +970,13 @@ namespace Kernel
     bool InfectionTB::IsSymptomatic() const 
     { 
         return m_shows_symptoms; 
-    }    
+    }
+
+    float InfectionTB::GetInfectiousness() const
+    {
+        // Return unmodified infectiousness; custon incubation timer handling 
+        return infectiousness;
+    }
 
     float InfectionTB::GetLatentCureRate() const
     {

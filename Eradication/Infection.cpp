@@ -29,7 +29,7 @@ namespace Kernel
     MortalityTimeCourse::Enum  InfectionConfig::mortality_time_course   =  MortalityTimeCourse::DAILY_MORTALITY;
     IDistribution* InfectionConfig::infectious_distribution = nullptr;
     IDistribution* InfectionConfig::incubation_distribution = nullptr;
-    float InfectionConfig::base_infectivity = 1.0f;
+    IDistribution* InfectionConfig::infectivity_distribution = nullptr;
     float InfectionConfig::base_mortality = 1.0f;
     bool  InfectionConfig::enable_disease_mortality = false;
     unsigned int InfectionConfig::number_basestrains = 1;
@@ -45,30 +45,47 @@ namespace Kernel
 
     bool InfectionConfig::Configure(const Configuration* config)
     {
+        LOG_DEBUG("Configure\n");
+
         initConfigTypeMap("Enable_Disease_Mortality", &enable_disease_mortality, Enable_Disease_Mortality_DESC_TEXT, true, "Simulation_Type", "GENERIC_SIM,VECTOR_SIM,STI_SIM,ENVIRONMENTAL_SIM,MALARIA_SIM,TBHIV_SIM,TYPHOID_SIM,PY_SIM");
         initConfig( "Mortality_Time_Course", mortality_time_course, config, MetadataDescriptor::Enum("mortality_time_course", Mortality_Time_Course_DESC_TEXT, MDD_ENUM_ARGS(MortalityTimeCourse)), "Enable_Disease_Mortality" );
         initConfigTypeMap("Base_Mortality", &base_mortality, Base_Mortality_DESC_TEXT, 0.0f, 1000.0f, 0.001f, "Enable_Disease_Mortality"); // should default change depending on disease?
-        initConfigTypeMap("Base_Infectivity", &base_infectivity, Base_Infectivity_DESC_TEXT, 0.0f, 1000.0f, 0.3f, "Simulation_Type", "GENERIC_SIM,VECTOR_SIM,STI_SIM,ENVIRONMENTAL_SIM,TBHIV_SIM,PY_SIM,HIV_SIM");// should default change depending on disease?
-       
-        // Configure incubation period
-        DistributionFunction::Enum incubation_period_function(DistributionFunction::CONSTANT_DISTRIBUTION);
-        initConfig("Incubation_Period_Distribution", incubation_period_function, config, MetadataDescriptor::Enum("Incubation_Period_Distribution", Incubation_Period_Distribution_DESC_TEXT, MDD_ENUM_ARGS(DistributionFunction)));
-        incubation_distribution = DistributionFactory::CreateDistribution( this, incubation_period_function, "Incubation_Period", config );
-        
-        // Configure infectious duration using depends-on.
-        DistributionFunction::Enum infectious_distribution_function(DistributionFunction::CONSTANT_DISTRIBUTION);
-        initConfig("Infectious_Period_Distribution", infectious_distribution_function, config, MetadataDescriptor::Enum("Infectious_Period_Distribution", Infectious_Period_Distribution_DESC_TEXT, MDD_ENUM_ARGS(DistributionFunction)), "Simulation_Type", "GENERIC_SIM, POLIO_SIM, VECTOR_SIM, ENVIRONMENTAL_SIM, PY_SIM, STI_SIM");
-        infectious_distribution = DistributionFactory::CreateDistribution( this, infectious_distribution_function, "Infectious_Period", config );
 
-        // Symptomatic
-        initConfigTypeMap( "Symptomatic_Infectious_Offset", &symptomatic_infectious_offset, Symptomatic_Infectious_Offset_DESC_TEXT, -FLT_MAX, FLT_MAX, FLT_MAX, "Simulation_Type", "GENERIC_SIM" ); //FLT_MAX Individual never becomes symptomatic
+        // Configure incubation duration
+        DistributionFunction::Enum incubation_period_function( DistributionFunction::NOT_INITIALIZED );
+        initConfig("Incubation_Period_Distribution", incubation_period_function, config, MetadataDescriptor::Enum("Incubation_Period_Distribution", Incubation_Period_Distribution_DESC_TEXT, MDD_ENUM_ARGS(DistributionFunction)), "Simulation_Type", "GENERIC_SIM,STI_SIM,VECTOR_SIM,DENGUE_SIM,MALARIA_SIM,AIRBORNE_SIM,ENVIRONMENTAL_SIM,POLIO_SIM,TYPHOID_SIM,PY_SIM");
+        if( incubation_period_function != DistributionFunction::NOT_INITIALIZED || JsonConfigurable::_dryrun )
+        {
+            incubation_distribution = DistributionFactory::CreateDistribution( this, incubation_period_function, "Incubation_Period", config );
+        }
 
+        // Configure infectious duration
+        DistributionFunction::Enum infectious_distribution_function( DistributionFunction::NOT_INITIALIZED );
+        initConfig("Infectious_Period_Distribution", infectious_distribution_function, config, MetadataDescriptor::Enum("Infectious_Period_Distribution", Infectious_Period_Distribution_DESC_TEXT, MDD_ENUM_ARGS(DistributionFunction)), "Simulation_Type", "GENERIC_SIM,STI_SIM,VECTOR_SIM,ENVIRONMENTAL_SIM,POLIO_SIM,PY_SIM");
+        if( infectious_distribution_function != DistributionFunction::NOT_INITIALIZED || JsonConfigurable::_dryrun )
+        {
+            infectious_distribution = DistributionFactory::CreateDistribution( this, infectious_distribution_function, "Infectious_Period", config );
+        } 
+
+        // Configure infectivity
+        DistributionFunction::Enum infectivity_distribution_function( DistributionFunction::NOT_INITIALIZED );
+        initConfig("Base_Infectivity_Distribution", infectivity_distribution_function, config, MetadataDescriptor::Enum("Base_Infectivity_Distribution", Base_Infectivity_Distribution_DESC_TEXT, MDD_ENUM_ARGS(DistributionFunction)), "Simulation_Type", "GENERIC_SIM,VECTOR_SIM,STI_SIM,HIV_SIM,ENVIRONMENTAL_SIM,AIRBORNE_SIM,TBHIV_SIM,PY_SIM");
+        if( infectivity_distribution_function != DistributionFunction::NOT_INITIALIZED || JsonConfigurable::_dryrun )
+        {
+            infectivity_distribution = DistributionFactory::CreateDistribution( this, infectivity_distribution_function, "Base_Infectivity", config );
+        }
+
+        // Symptomatic; 0.0 = Symptomatic when infectious, FLT_MAX = Individual never symptomatic
+        initConfigTypeMap( "Symptomatic_Infectious_Offset", &symptomatic_infectious_offset, Symptomatic_Infectious_Offset_DESC_TEXT, -FLT_MAX, FLT_MAX, 0.0f, "Simulation_Type", "GENERIC_SIM" );
+
+        // Strain tracking
         initConfigTypeMap( "Number_Basestrains", &number_basestrains, Number_Basestrains_DESC_TEXT, 1,       10,   1 );
         if( !JsonConfigurable::_dryrun && GET_CONFIGURABLE( SimulationConfig )->sim_type != SimType::MALARIA_SIM ) // Don't want this even in schema for MALARIA_SIM. TBD.
         {
             initConfigTypeMap( "Number_Substrains", &number_substrains, Number_Substrains_DESC_TEXT, 1, 16777216, 256 );
         }
 
+        // Evaluate configuration
         return JsonConfigurable::Configure( config );
     }
 
@@ -132,28 +149,33 @@ namespace Kernel
         // Set up infection strain
         CreateInfectionStrain(infstrain);
 
+        // Incubation duration; subtracting FLT_MIN ensures infectious when incubation_time = 0.0f 
         if( incubation_period_override != -1 )
         {
-            incubation_timer = float(incubation_period_override);
+            incubation_timer = static_cast<float>(incubation_period_override) - FLT_MIN;
         }
-        else
+        else if(InfectionConfig::incubation_distribution)
         {
-            incubation_timer = InfectionConfig::incubation_distribution->Calculate( parent->GetRng() );
-            LOG_DEBUG_F( "incubation_timer initialized to %f for individual %d\n", incubation_timer, parent->GetSuid().data );
+            incubation_timer = InfectionConfig::incubation_distribution->Calculate( GetParent()->GetRng() ) - FLT_MIN;
         }
+        LOG_DEBUG_F( "incubation_timer initialized to %f for individual %d\n", incubation_timer, GetParent()->GetSuid().data );
 
-        infectious_timer = InfectionConfig::infectious_distribution->Calculate( parent->GetRng() );
-        
+        // Infection duration
+        if(InfectionConfig::infectious_distribution)
+        {
+            infectious_timer = InfectionConfig::infectious_distribution->Calculate( GetParent()->GetRng() );
+        }
         LOG_DEBUG_F( "infectious_timer = %f\n", infectious_timer );
 
-        total_duration = incubation_timer + infectious_timer;
-        infectiousness = 0;
-        StateChange    = InfectionStateChange::None;
-
-        if (incubation_timer <= 0)
+        // Infectiousness
+        if(InfectionConfig::infectivity_distribution)
         {
-            infectiousness = InfectionConfig::base_infectivity;
+            infectiousness = InfectionConfig::infectivity_distribution->Calculate( GetParent()->GetRng() );
         }
+        LOG_DEBUG_F( "infectiousness initialized to %f for individual %d\n", infectiousness, GetParent()->GetSuid().data );
+
+        total_duration = incubation_timer + infectious_timer;
+        StateChange    = InfectionStateChange::None;
     }
 
     void Infection::InitInfectionImmunology(ISusceptibilityContext* _immunity)
@@ -166,26 +188,18 @@ namespace Kernel
         StateChange = InfectionStateChange::None;
         duration += dt;
 
-        if (duration > incubation_timer)
-        {
-            infectiousness = InfectionConfig::base_infectivity;
-
-            // Used to have a release_assert( infectiousness ) here to make sure infectiousness was not zero, 
-            // but setting infectiousness to zero can be a valid use case (e.g., while applying external incidence only)
-        }
-
         // To query for mortality-reducing effects of drugs or vaccines
         IDrugVaccineInterventionEffects* idvie = nullptr;
 
         // if disease has a daily mortality rate, and disease mortality is on, then check for death. mortality_time_course depends-on enable_disease_mortality BUT DAILY_MORTALITY is default
         if (InfectionConfig::enable_disease_mortality && (InfectionConfig::mortality_time_course == MortalityTimeCourse::DAILY_MORTALITY) && (duration > incubation_timer))
         {
-            if ( s_OK != parent->GetInterventionsContext()->QueryInterface(GET_IID(IDrugVaccineInterventionEffects), (void**)&idvie) )
+            if ( s_OK != GetParent()->GetInterventionsContext()->QueryInterface(GET_IID(IDrugVaccineInterventionEffects), (void**)&idvie) )
             {
-                throw QueryInterfaceException( __FILE__, __LINE__, __FUNCTION__, "parent->GetInterventionsContext()", "IDrugVaccineInterventionEffects", "IIndividualHumanInterventionsContext" );
+                throw QueryInterfaceException( __FILE__, __LINE__, __FUNCTION__, "GetParent()->GetInterventionsContext()", "IDrugVaccineInterventionEffects", "IIndividualHumanInterventionsContext" );
             }
             float prob = InfectionConfig::base_mortality * dt * immunity->getModMortality() * idvie->GetInterventionReducedMortality();
-            if( parent->GetRng()->SmartDraw( prob ) )
+            if( GetParent()->GetRng()->SmartDraw( prob ) )
             { 
                 StateChange = InfectionStateChange::Fatal; 
             }
@@ -196,12 +210,12 @@ namespace Kernel
             // disease mortality active and is accounted for at end of infectious period. mortality_time_course depends-on enable_disease_mortality
             if (InfectionConfig::enable_disease_mortality && InfectionConfig::mortality_time_course == MortalityTimeCourse::MORTALITY_AFTER_INFECTIOUS )
             {
-                if ( s_OK != parent->GetInterventionsContext()->QueryInterface(GET_IID(IDrugVaccineInterventionEffects), (void**)&idvie) )
+                if ( s_OK != GetParent()->GetInterventionsContext()->QueryInterface(GET_IID(IDrugVaccineInterventionEffects), (void**)&idvie) )
                 {
-                    throw QueryInterfaceException( __FILE__, __LINE__, __FUNCTION__, "parent->GetInterventionsContext()", "IDrugVaccineInterventionEffects", "IIndividualHumanInterventionsContext" );
+                    throw QueryInterfaceException( __FILE__, __LINE__, __FUNCTION__, "GetParent()->GetInterventionsContext()", "IDrugVaccineInterventionEffects", "IIndividualHumanInterventionsContext" );
                 }
                 float prob = InfectionConfig::base_mortality * immunity->getModMortality() * idvie->GetInterventionReducedMortality();
-                if( parent->GetRng()->SmartDraw( prob ) )
+                if( GetParent()->GetRng()->SmartDraw( prob ) )
                 {
                     StateChange = InfectionStateChange::Fatal;
                 }
@@ -217,7 +231,7 @@ namespace Kernel
         }
 
         UpdateSymptomatic( duration, incubation_timer );
-        
+
         EvolveStrain(immunity, dt); // genomic modifications
     }
 
@@ -250,17 +264,41 @@ namespace Kernel
         infstrain->SetGeneticID( infection_strain->GetGeneticID() );
     }
 
-    void Infection::SetContextTo(IIndividualHumanContext* context) { parent = context; }
+    bool Infection::StrainMatches( IStrainIdentity * pStrain )
+    {
+        return( infection_strain->GetAntigenID() == pStrain->GetAntigenID() );
+    }
 
-    IIndividualHumanContext* Infection::GetParent() { return parent; }
+    void Infection::SetContextTo(IIndividualHumanContext* context)
+    {
+        parent = context;
+    }
 
-    suids::suid Infection::GetSuid() const { return suid; }
+    IIndividualHumanContext* Infection::GetParent()
+    {
+        return parent;
+    }
 
-    const SimulationConfig* Infection::params() { return GET_CONFIGURABLE(SimulationConfig); } // overridden in derived classes but with different return types to hide the casting operation
+    suids::suid Infection::GetSuid() const 
+    {
+        return suid;
+    }
 
-    InfectionStateChange::_enum Infection::GetStateChange() const { return StateChange; }
+    // overridden in derived classes but with different return types to hide the casting operation
+    const SimulationConfig* Infection::params()
+    {
+        return GET_CONFIGURABLE(SimulationConfig);
+    }
 
-    float Infection::GetInfectiousness() const { return infectiousness; }
+    InfectionStateChange::_enum Infection::GetStateChange() const
+    {
+        return StateChange; 
+    }
+
+    float Infection::GetInfectiousness() const 
+    {
+        return infectiousness; 
+    }
 
     float Infection::GetInfectiousnessByRoute( const string& route ) const {
         if( infectiousnessByRoute.find( route ) == infectiousnessByRoute.end() )
@@ -276,9 +314,7 @@ namespace Kernel
         return false;
     }
 
-    NonNegativeFloat
-    Infection::GetDuration()
-    const
+    NonNegativeFloat Infection::GetDuration() const
     {
         return duration;
     }
@@ -310,22 +346,19 @@ namespace Kernel
     void Infection::serialize(IArchive& ar, Infection* obj)
     {
         Infection& infection = *obj;
-        ar.labelElement( "suid" ) & infection.suid;
-        ar.labelElement( "duration" ) & infection.duration;
-        ar.labelElement( "total_duration" ) & infection.total_duration;
-        ar.labelElement( "incubation_timer" ) & infection.incubation_timer;
-        ar.labelElement( "infectious_timer" ) & infection.infectious_timer;
-        ar.labelElement( "infectiousness" ) & infection.infectiousness;
-        ar.labelElement( "infectiousnessByRoute" ) & infection.infectiousnessByRoute;
-        ar.labelElement( "StateChange" ) & (uint32_t&)infection.StateChange;
-        ar.labelElement( "infection_strain" ); StrainIdentity::serialize( ar, infection.infection_strain );
-        ar.labelElement( "m_is_symptomatic" )  & infection.m_is_symptomatic;
-        ar.labelElement( "m_is_newly_symptomatic" )  & infection.m_is_newly_symptomatic;
-    }
+        ar.labelElement( "suid" )                      & infection.suid;
+        ar.labelElement( "duration" )                  & infection.duration;
+        ar.labelElement( "total_duration" )            & infection.total_duration;
+        ar.labelElement( "incubation_timer" )          & infection.incubation_timer;
+        ar.labelElement( "infectious_timer" )          & infection.infectious_timer;
+        ar.labelElement( "infectiousness" )            & infection.infectiousness;
+        ar.labelElement( "infectiousnessByRoute" )     & infection.infectiousnessByRoute;
 
-    bool
-    Infection::StrainMatches( IStrainIdentity * pStrain )
-    {
-        return( infection_strain->GetAntigenID() == pStrain->GetAntigenID() );
+        ar.labelElement( "StateChange" )               & (uint32_t&)infection.StateChange;
+
+        ar.labelElement( "infection_strain" );        StrainIdentity::serialize( ar, infection.infection_strain );
+
+        ar.labelElement( "m_is_symptomatic" )          & infection.m_is_symptomatic;
+        ar.labelElement( "m_is_newly_symptomatic" )    & infection.m_is_newly_symptomatic;
     }
 }
