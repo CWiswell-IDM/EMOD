@@ -297,7 +297,7 @@ namespace Kernel
 
     float Infection::GetInfectiousness() const 
     {
-        return infectiousness; 
+        return duration > incubation_timer ? infectiousness : 0.0f;
     }
 
     float Infection::GetInfectiousnessByRoute( const string& route ) const {
