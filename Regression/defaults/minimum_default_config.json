@@ -1,7 +1,8 @@
 {
     "parameters": {
         "Age_Initialization_Distribution_Type": "DISTRIBUTION_SIMPLE",
-        "Base_Infectivity": 0.3,
+        "Base_Infectivity_Distribution": "CONSTANT_DISTRIBUTION",
+        "Base_Infectivity_Constant": 0.3,
         "Climate_Model": "CLIMATE_OFF",
         "Config_Name": "",
         "Custom_Coordinator_Events": [],
