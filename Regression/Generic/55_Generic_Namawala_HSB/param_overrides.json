@@ -8,7 +8,7 @@
             ]
         },
         "DISEASE": {
-            "Base_Infectivity": 1e-05,
+            "Base_Infectivity_Constant": 1e-05,
             "x_Base_Population": 10.0,
             "Infectious_Period_Exponential": 10000,
             "Population_Scale_Type": "FIXED_SCALING",

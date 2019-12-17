@@ -23,7 +23,7 @@
                 "Incubation_Period_Constant": 0
             },
             "INFECTIOUSNESS": {
-                "Base_Infectivity": 1e-10,
+                "Base_Infectivity_Constant": 1e-10,
                 "Infectious_Period_Distribution": "CONSTANT_DISTRIBUTION",
                 "Infectious_Period_Constant": 1
             }

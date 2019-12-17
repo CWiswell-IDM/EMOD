@@ -5,7 +5,7 @@
             "Acquisition_Blocking_Immunity_Decay_Rate": 0.1,
             "Acquisition_Blocking_Immunity_Duration_Before_Decay": 0,
             "Infectious_Period_Exponential": 30,
-            "Base_Infectivity": 0.5,
+            "Base_Infectivity_Constant": 0.5,
             "Base_Mortality": 0,
             "Demographics_Filenames": [
                 "demographics.json"

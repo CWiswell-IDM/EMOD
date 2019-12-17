@@ -3,7 +3,7 @@
     "parameters": {
         ".Disable_IP_Whitelist": 1,
         "Acquisition_Blocking_Immunity_Duration_Before_Decay": 10,
-        "Base_Infectivity": 0.5,
+        "Base_Infectivity_Constant": 0.5,
         "Config_Name": "57_Generic_NodeProperties",
         "Custom_Reports_Filename": "custom_reports.json",
         "DEMOGRAPHICS": {

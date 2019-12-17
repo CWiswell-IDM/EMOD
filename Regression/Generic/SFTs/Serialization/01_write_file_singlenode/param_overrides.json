@@ -20,7 +20,7 @@
                 "Base_Incubation_Period": 0
             },
             "INFECTIOUSNESS": {
-                "Base_Infectivity": 0.7
+                "Base_Infectivity_Constant": 0.7
             }
         },
         "PRIMARY": {

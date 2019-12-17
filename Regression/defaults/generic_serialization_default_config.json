@@ -81,7 +81,8 @@
             },
             "INFECTIOUSNESS": {
                 "Infectious_Period_Exponential": 7,
-                "Base_Infectivity": 0.3,
+                "Base_Infectivity_Distribution": "CONSTANT_DISTRIBUTION",
+                "Base_Infectivity_Constant": 0.3,
                 "Infectious_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",
                 "Infectivity_Scale_Type": "CONSTANT_INFECTIVITY",
                 "Population_Density_Infectivity_Correction": "CONSTANT_INFECTIVITY"
