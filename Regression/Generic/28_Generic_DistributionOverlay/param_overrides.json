@@ -29,7 +29,7 @@
         },
         "DISEASE": {
             "INFECTIOUSNESS": {
-                "Base_Infectivity": 2.5
+                "Base_Infectivity_Constant": 2.5
             },
             "INCUBATION": {
                 "Incubation_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",

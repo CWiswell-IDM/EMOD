@@ -15,7 +15,7 @@ matches = ["Update(): Time: ",
 
 KEY_TOTAL_TIMESTEPS = "Simulation_Duration"
 KEY_SIMULATION_TIMESTEP = "Simulation_Timestep"
-KEY_BASE_INFECTIVITY = "Base_Infectivity"
+KEY_BASE_INFECTIVITY = "Base_Infectivity_Constant"
 KEY_AMPLITUDE = "Infectivity_Sinusoidal_Forcing_Amplitude"
 KEY_PHASE = "Infectivity_Sinusoidal_Forcing_Phase"
 KEY_INFECTED = "infected"

@@ -83,7 +83,8 @@
                 "Incubation_Period_Distribution": "CONSTANT_DISTRIBUTION"
             },
             "INFECTIOUSNESS": {
-                "Base_Infectivity": 0.3,
+                "Base_Infectivity_Distribution": "CONSTANT_DISTRIBUTION",
+                "Base_Infectivity_Constant": 0.3,
                 "Infectious_Period_Distribution": "EXPONENTIAL_DISTRIBUTION",
                 "Infectious_Period_Exponential": 7,
                 "Infectivity_Exponential_Baseline": 0.5,

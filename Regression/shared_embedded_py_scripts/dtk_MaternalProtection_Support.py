@@ -9,7 +9,7 @@ import os
 
 KEY_TOTAL_TIMESTEPS = "Simulation_Duration"
 KEY_SIMULATION_TIMESTEP = "Simulation_Timestep"
-KEY_BASE_INFECTIVITY = "Base_Infectivity"
+KEY_BASE_INFECTIVITY = "Base_Infectivity_Constant"
 KEY_ENABLE_BIRTH = "Enable_Birth"
 KEY_SUSCEPTIBILITY_TYPE = "Susceptibility_Type"  # ("FRACTIONAL", "BINARY")
 KEY_MATERNAL_PROTECTION_TYPE = "Maternal_Protection_Type"  # ("LINEAR, "SIGMOID", "NONE")

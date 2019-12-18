@@ -16,7 +16,7 @@ matches = ["Update(): Time: ",
 
 KEY_TOTAL_TIMESTEPS = "Simulation_Duration"
 KEY_SIMULATION_TIMESTEP = "Simulation_Timestep"
-KEY_BASE_INFECTIVITY = "Base_Infectivity"
+KEY_BASE_INFECTIVITY = "Base_Infectivity_Constant"
 KEY_INFECTIVITY_SCALE_TYPE = "Infectivity_Scale_Type"
 KEY_BOXCAR = "ANNUAL_BOXCAR_FUNCTION"
 KEY_AMPLITUDE = "Infectivity_Boxcar_Forcing_Amplitude"

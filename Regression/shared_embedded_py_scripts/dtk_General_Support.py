@@ -92,7 +92,7 @@ class ConfigKeys:
     Base_Incubation_Period = 'Base_Incubation_Period'
     Base_Individual_Sample_Rate = 'Base_Individual_Sample_Rate'
     Base_Infectious_Period = 'Base_Infectious_Period'
-    Base_Infectivity = 'Base_Infectivity'
+    Base_Infectivity = 'Base_Infectivity_Constant'
     Base_Land_Temperature = 'Base_Land_Temperature'
     Base_Mortality = 'Base_Mortality'
     Base_Population_Scale_Factor = 'Base_Population_Scale_Factor'
