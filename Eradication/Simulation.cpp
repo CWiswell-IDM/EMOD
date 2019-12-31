@@ -254,12 +254,6 @@ namespace Kernel
             }
         }
 
-        if(enable_termination_on_zero_total_infectivity && EnvPtr->MPI.NumTasks > 1)
-        {
-            throw IncoherentConfigurationException(__FILE__, __LINE__, __FUNCTION__, "Enable_Termination_On_Zero_Total_Infectivity", 1, "number of processes",
-                                                    EnvPtr->MPI.NumTasks , "Multi-core simulation abort conditions are not currently supported." );
-        }
-
         if( !JsonConfigurable::_dryrun && 
             ((GET_CONFIGURABLE(SimulationConfig)->starttime + GET_CONFIGURABLE(SimulationConfig)->Sim_Duration) < min_sim_endtime) )
         {
@@ -279,15 +273,20 @@ namespace Kernel
         if(enable_termination_on_zero_total_infectivity && currentTime.time > min_sim_endtime)
         {
             // Accumulate node infectivity
-            float totInfVal = 0.0f;
+            float totInfVal         = 0.0f;
+            float totInfVal_unified = 0.0f;
+
             for (auto iterator = nodes.rbegin(); iterator != nodes.rend(); ++iterator)
             {
                 INodeContext* n = iterator->second;
                 totInfVal += n->GetInfectivity();
             }
 
+            // Accumulate infectivity from all cores
+            EnvPtr->MPI.p_idm_mpi->Reduce(&totInfVal, &totInfVal_unified, 1);
+
             // Abort on zero infectivity
-            if(totInfVal == 0.0f)
+            if(totInfVal_unified == 0.0f)
             {
                 LOG_INFO("Zero infectivity at current time-step; simulation aborting.\n");
                 abortSim = true;
