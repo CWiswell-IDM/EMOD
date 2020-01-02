@@ -283,7 +283,7 @@ namespace Kernel
             }
 
             // Accumulate infectivity from all cores
-            EnvPtr->MPI.p_idm_mpi->Reduce(&totInfVal, &totInfVal_unified, 1);
+            EnvPtr->MPI.p_idm_mpi->Allreduce_SUM(&totInfVal, &totInfVal_unified, 1);
 
             // Abort on zero infectivity
             if(totInfVal_unified == 0.0f)
