@@ -54,7 +54,13 @@
         { "path" : "Generic/SFTs/Serialization/01_write_file_singlenode" },
         { "path" : "Generic/SFTs/Serialization/02_read_file_singlenode" },
         { "path" : "Generic/SFTs/Serialization/03_infections_remain" },
-        { "path" : "Generic/SFTs/MigrationModel/Migration_AgeAndGender" }
+        { "path" : "Generic/SFTs/MigrationModel/Migration_AgeAndGender" },
+        { "path" : "Generic/SFTs/ZeroInfectivityAbort/Multicore-disabled" },
+        { "path" : "Generic/SFTs/ZeroInfectivityAbort/Multicore-enabled-below-mintime" },
+        { "path" : "Generic/SFTs/ZeroInfectivityAbort/Multicore-enabled-past-mintime" },
+        { "path" : "Generic/SFTs/ZeroInfectivityAbort/SingleCore-disabled" },
+        { "path" : "Generic/SFTs/ZeroInfectivityAbort/SingleCore-enabled-below-mintime" },
+        { "path" : "Generic/SFTs/ZeroInfectivityAbort/SingleCore-enabled-past-mintime" }
     ],
      "skipped": [
         { "path" : "Generic/SFTs/MigrationModel/9Nodes_stationary_dist_1x20000_LocalMigration_AllInfected" },
