@@ -15,7 +15,7 @@
         "Infectious_Period_Constant":7,
         "Minimum_End_Time":66,
         "Minimum_End_Time_description":"The minimum time step the simulation must reach before checking for early termination conditions.",
-        "Python_Script_Path": "LOCAL",
+        "Python_Script_Path": "SHARED",
         "Simulation_Duration":200,
         "Num_Cores":1,
         "Config_Name":"Generic_ZeroInfectivityAbort_MultiCore_Disabled"

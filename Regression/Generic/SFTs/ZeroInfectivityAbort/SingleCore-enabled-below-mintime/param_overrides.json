@@ -18,6 +18,6 @@
         "Simulation_Duration":200,
         "Num_Cores":1,
         "Config_Name":"Generic_ZeroInfectivityAbort_MultiCore_Disabled",
-        "Python_Script_Path": "LOCAL"
+        "Python_Script_Path": "SHARED"
     }
 }
